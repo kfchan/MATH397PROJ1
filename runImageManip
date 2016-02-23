@@ -1,0 +1,4 @@
+#!/bin/bash
+
+cd bin
+java project1.imageManip
