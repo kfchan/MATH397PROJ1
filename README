@@ -1,5 +1,5 @@
 For now, the project will be pixel manipulation!
 
-Use ./runImageManip to create blank canvas (for now).
+Use ./runImageManip <file> with a path to the image you want displayed.
 
 Katherine Chan
