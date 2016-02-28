@@ -5,5 +5,5 @@ then
     echo "One file needed!"
 else
     cd bin
-	java project1.imageManip $1
+	java project1.ImageManip $1
 fi
