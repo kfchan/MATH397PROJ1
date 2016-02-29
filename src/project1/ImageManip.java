@@ -42,6 +42,43 @@ public class ImageManip {
 		return this.canvas.getHeight();
 	}
 
+	public void circles(int n) {
+		for (int x = 0; x < this.getPictureWidth(); x += n) {
+			for (int y = 0; y < this.getPictureHeight(); y += n) {
+				createCircle(x,y,n);
+			}
+		}		
+	}
+
+	private void createCircle(int x, int y, int n) {
+		int avgRed = 0;
+		int avgGreen = 0;
+		int avgBlue = 0;
+
+		for (int i = x; i < (x+n); i++) {
+			for (int j = y; j < (y+n); j++) {
+				if (j < this.getPictureHeight() && i < this.getPictureWidth()) {
+					avgRed += this.image.getPixelRed(i,j);
+					avgGreen += this.image.getPixelGreen(i,j);
+					avgBlue += this.image.getPixelBlue(i,j);
+				}
+			}
+		}
+
+		avgRed = avgRed / (n*n);		
+		avgGreen = avgGreen / (n*n);
+		avgBlue = avgBlue / (n*n);
+
+		// draw circle in the middle of each block
+		int mid = n/2;
+		x += mid;
+		y += mid;
+		if (x < this.getPictureWidth() && y < this.getPictureHeight()) {
+			this.canvas.setPenColor(avgRed,avgGreen,avgBlue);
+			this.canvas.drawCircleFill(x,y,mid); 
+		}
+	}
+
 	/** 
 	* blocks the image into nxn squares
 	*/
@@ -92,7 +129,7 @@ public class ImageManip {
 		}
 
 		ImageManip imageManip = new ImageManip(pirateArgs[0]);
-		imageManip.squares(25);
+		imageManip.circles(10);
 		imageManip.displayNewImage();
 	}
 }
