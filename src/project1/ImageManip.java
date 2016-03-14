@@ -156,6 +156,9 @@ public class ImageManip {
 		}		
 	}
 
+	/**
+	* makes the picture a collection of triangles
+	*/
 	public void triangles(int n) {
 		double height = n / 2 * Math.sqrt(3); // height of triangle
 		int startX = n/2;
@@ -167,110 +170,73 @@ public class ImageManip {
 	}
 
 	private void drawColumn(int startX, int startY, int n, int height) {
-		int[] xPoints = new int[3];
-		int[] yPoints = new int[3];
-
-		xPoints[0] = startX; // this entry will never change
-
 		while(startY < this.getPictureHeight()) {
-			this.drawRightHalfCol(startX, startY, n, height);
-			startY = this.drawLeftHalfCol(startX, startY, n, height);
+			int[] newPoint = this.drawUprightTriangle(startX, startY, n, height);
+			this.drawUpsideDownTriangle(startX, startY, n, height);
+			startY = newPoint[1];
 		}
 	}
 
-	private void drawRightHalfCol(int startX, int startY, int n, int height) {
+	private int[] drawUprightTriangle(int x, int y, int n, int height) {
 		int[] xPoints = new int[3];
 		int[] yPoints = new int[3];
 
-		this.canvas.setPosition(startX, startY);
-		// top left point of first triangle
-		xPoints[0] = startX;
-		yPoints[0] = startY;
+		xPoints[0] = x;
+		yPoints[0] = y;
 
-		this.canvas.setDirection(0);
-		this.canvas.drawForward(n);
-		// top right point of first triangle
+		int[] avgValues = this.getAveragedVals(x-(n/2), y, n, height);
+		this.canvas.setPenColor(avgValues[0], avgValues[1], avgValues[2]);
+		this.canvas.setPenWidth(0);
+		this.canvas.setPosition(x, y);
+
+		this.canvas.setDirection(-60);	
+		this.canvas.drawForward(n);	
 		xPoints[1] = (int) this.canvas.getX();
 		yPoints[1] = (int) this.canvas.getY();
 
-		this.canvas.rotate(-120);	
+		this.canvas.setDirection(180);
 		this.canvas.drawForward(n);	
-		// bottom point of the first triangle
-		startY = (int) this.canvas.getY();	
-		xPoints[2] = startX + n/2;
-		yPoints[2] = startY;
-
-		if (startX < this.getPictureWidth() && startY < this.getPictureHeight()) {
-			int[] avgValues = this.getAveragedVals(startX, startY, n, height);
-			this.canvas.setPenColor(avgValues[0], avgValues[1], avgValues[2]);
-			this.canvas.fillPoly(xPoints, yPoints, 3);
-		}
-
-		// get bottom upright adjacent triangle
-		this.canvas.setDirection(240);
-		this.canvas.drawForward(n);	
-		// bottom left point of the second triangle
-		xPoints[1] = (int) this.canvas.getX();
-		yPoints[1] = (int) this.canvas.getY();	
-
-		this.canvas.setDirection(0);	
-		this.canvas.drawForward(n);	
-		// bottom left point of the second triangle
-		xPoints[0] = (int) this.canvas.getX();
-		yPoints[0] = (int) this.canvas.getY();
-
-		if (xPoints[2]-n/2 < this.getPictureWidth() && yPoints[2] < this.getPictureHeight()) {
-			int[] avgValues = this.getAveragedVals(xPoints[2]-n/2, yPoints[2], n, height);
-			this.canvas.setPenColor(avgValues[0], avgValues[1], avgValues[2]);
-			this.canvas.fillPoly(xPoints, yPoints, 3);
-		}
-	}
-
-	/** 
-	* @return the new startY
-	*/
-	private int drawLeftHalfCol(int startX, int startY, int n, int height) {
-		// draw upright triangle
-		int[] xPoints = new int[3];
-		int[] yPoints = new int[3];
-
-		this.canvas.setPosition(startX, startY);
-		// top point of the triangle
-		xPoints[0] = startX;
-		yPoints[0] = startY;		
-
-		this.canvas.setDirection(240);
-		this.canvas.drawForward(n);
-		// bottom left point of the triangle
-		xPoints[1] = (int) this.canvas.getX();
-		yPoints[1] = (int) this.canvas.getY();
-
-		this.canvas.rotate(120);
-		this.canvas.drawForward(n);
-		// bottom right point of the triangle
 		xPoints[2] = (int) this.canvas.getX();
 		yPoints[2] = (int) this.canvas.getY();
 
-		if (startX-n/2 < this.getPictureWidth() && startY < this.getPictureHeight()) {
-		int[] avgValues = this.getAveragedVals(startX-n/2, startY, n, height);
-		this.canvas.setPenColor(avgValues[0], avgValues[1], avgValues[2]);
+		// this.canvas.setDirection(60);
+		// this.canvas.drawForward(n);
+
 		this.canvas.fillPoly(xPoints, yPoints, 3);
-		}
 
-		// draw upside down triangle
-		this.canvas.rotate(-120);
-		this.canvas.drawForward(n);
-		// bottom point of adjacent upside down triangle
-		startY = (int) this.canvas.getY();
-		yPoints[0] = startY;
+		int[] rtn = {(int) xPoints[2], (int) yPoints[2]};
+		return rtn;
+	}
 
-		if (xPoints[1] < this.getPictureWidth() && yPoints[1] < this.getPictureHeight()) {
-		int[] avgValues = this.getAveragedVals(xPoints[1], yPoints[1], n, height);
+	private int[] drawUpsideDownTriangle(int x, int y, int n, int height) {
+		int[] xPoints = new int[3];
+		int[] yPoints = new int[3];
+
+		xPoints[0] = x;
+		yPoints[0] = y;
+
+		int[] avgValues = this.getAveragedVals(x-(n/2), y, n, height);
 		this.canvas.setPenColor(avgValues[0], avgValues[1], avgValues[2]);
-		this.canvas.fillPoly(xPoints, yPoints, 3);
-		}	
+		this.canvas.setPenWidth(0);
+		this.canvas.setPosition(x, y);
 
-		return startY;
+		this.canvas.setDirection(-60);	
+		this.canvas.drawForward(n);	
+		xPoints[2] = (int) this.canvas.getX();
+		yPoints[2] = (int) this.canvas.getY();
+
+		this.canvas.setDirection(60);	
+		this.canvas.drawForward(n);	
+		xPoints[1] = (int) this.canvas.getX();
+		yPoints[1] = (int) this.canvas.getY();
+
+		// this.canvas.setDirection(180);	
+		// this.canvas.drawForward(n);		
+
+		this.canvas.fillPoly(xPoints, yPoints, 3);
+
+		int[] rtn = {(int) xPoints[2], (int) yPoints[2]};
+		return rtn;		
 	}
 
 	public static void main(String[] pirateArgs) {

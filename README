@@ -1,6 +1,8 @@
 For now, the project will be pixel manipulation!
 
 Can change main function to change the manipulation.
-Use ./runImageManip <file> with a path to the image you want displayed.
+Use './runImageManip <file> <n>':
+	- file is the path to the picture file to be manipulated
+	- n is the int that will determine how the file will be manipulated
 
 Katherine Chan
