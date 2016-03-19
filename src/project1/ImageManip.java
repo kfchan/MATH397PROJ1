@@ -9,6 +9,14 @@ public class ImageManip {
 	private static final int BLUE = 2;
 	private static final int NUM_TRIANGLE_SIDES = 3;
 
+	/** if on, the rgb valued triangles rotate **/
+	private static final boolean IS_ROT_ON = true;
+	/** rotates rgb trianges by this offset for each time it is drawn **/
+	private static final int ROT_OFFSET_BY = 2;
+
+	/** if 1, the rgb triangles are not equalateral; if 2, they are **/
+ 	private static final int TRI_TYPE = 1;
+
 	private final Picture image;
 	private final Random random;
 
@@ -20,7 +28,7 @@ public class ImageManip {
 	* creates new canvas for manipulation
 	*/
 	public ImageManip(String file) {
-		this.image = new Picture("../" + file, false);
+		this.image = new Picture(file, false);
 		this.canvas = new Picture(this.image.getWidth(), this.image.getHeight(), false);
 		this.random = new Random();
 		this.rotateOffset = 0;
@@ -52,6 +60,13 @@ public class ImageManip {
 	*/
 	private int getPictureHeight() {
 		return this.canvas.getHeight();
+	}
+
+	/** 
+	* @return taverage of n and m
+	*/	
+	private int avg(int n, int m) {
+		return (n + m)/2;
 	}
 
 	/**
@@ -128,7 +143,7 @@ public class ImageManip {
 
 	private int randomize(int n) {
 		int rand = this.random.nextInt((int) 2 * n);
-		rand = rand - (rand/2);
+		rand = rand - n;
 		if (rand > 0) {
 			n += rand;
 		} else {
@@ -177,6 +192,11 @@ public class ImageManip {
 		}
 	}
 
+	/**
+	* draws a whole column of triangles
+	* where a unit of the column is an upright triangle on the left and an upside down one on the right
+	* such that they fit together like a puzzle
+	*/
 	private void drawColumn(int startX, int startY, int n, int height, boolean isRGBTri) {
 		while(startY < this.getPictureHeight()) {
 			int[] newPoint = this.drawUprightTriangle(startX, startY, n, height, isRGBTri);
@@ -185,8 +205,10 @@ public class ImageManip {
 		}
 	}
 
+	/**
+	* draws all three rgb triangles in the given averaged triangle
+	*/
 	private void createMiniTriangles(int[] xPoints, int[] yPoints, int[] color) {
-		// System.out.println(color[0] + " " + color[1] + " " + color[2]);
 		int[] xMidpoints = new int[NUM_TRIANGLE_SIDES];
 		int[] yMidpoints = new int[NUM_TRIANGLE_SIDES];
 
@@ -197,14 +219,20 @@ public class ImageManip {
 
 		// midpoint i, midpoint i+1, point i
 		for (int i = 0; i < NUM_TRIANGLE_SIDES; i++) {
-			int[] xMini = {xMidpoints[i], xMidpoints[(i + 1) % NUM_TRIANGLE_SIDES], xPoints[i]};
-			int[] yMini = {yMidpoints[i], yMidpoints[(i + 1) % NUM_TRIANGLE_SIDES], yPoints[i]};
+			int[] xMini = {xMidpoints[i], xMidpoints[(i + TRI_TYPE) % NUM_TRIANGLE_SIDES], xPoints[i]};
+			int[] yMini = {yMidpoints[i], yMidpoints[(i + TRI_TYPE) % NUM_TRIANGLE_SIDES], yPoints[i]};
 			int colorVal = (i + this.rotateOffset) % NUM_TRIANGLE_SIDES;
 			this.drawMiniTriangle(xMini, yMini, color[colorVal], colorVal);
 		}
-		// this.rotateOffset += 1;
+		if (IS_ROT_ON) {
+			this.rotateOffset += ROT_OFFSET_BY;
+		}
 	}
 
+	/**
+	* draws the rgb triangle by filling in the value with its corresponding color
+	* 'whites' out the  other colors
+	*/
 	private void drawMiniTriangle(int[] xPoints, int[] yPoints, int rgbVal, int rgbColor) {
 		if (rgbColor == RED) {
 			this.canvas.setPenColor(rgbVal, 255, 255);
@@ -218,10 +246,6 @@ public class ImageManip {
 		this.canvas.fillPoly(xPoints, yPoints, NUM_TRIANGLE_SIDES);
 	}
 
-	private int avg(int n, int m) {
-		return (n + m)/2;
-	}
-
 	private int[] drawUprightTriangle(int x, int y, int n, int height, boolean isRGBTri) {
 		int[] xPoints = new int[NUM_TRIANGLE_SIDES];
 		int[] yPoints = new int[NUM_TRIANGLE_SIDES];
@@ -230,12 +254,13 @@ public class ImageManip {
 		yPoints[0] = y;
 
 		if (isRGBTri) {
-			this.canvas.setPenWidth(1);
+			this.canvas.setPenWidth(0);
 		} else {
 			this.canvas.setPenWidth(0);
 		}		
 
 		int[] avgValues = this.getAveragedVals(x-(n/2), y, n, height);
+		// this.canvas.setPenColor(0, 0, 0);
 		this.canvas.setPenColor(avgValues[0], avgValues[1], avgValues[2]);
 		// top vertex
 		this.canvas.setPosition(x, y);
@@ -255,6 +280,7 @@ public class ImageManip {
 		this.canvas.setDirection(60);
 		this.canvas.drawForward(n);
 
+		// this.canvas.setPenColor(avgValues[0], avgValues[1], avgValues[2]);
 		this.canvas.fillPoly(xPoints, yPoints, NUM_TRIANGLE_SIDES);
 		if (isRGBTri) {
 			this.createMiniTriangles(xPoints, yPoints, avgValues);
@@ -272,12 +298,13 @@ public class ImageManip {
 		yPoints[0] = y;
 
 		if (isRGBTri) {
-			this.canvas.setPenWidth(1);
+			this.canvas.setPenWidth(0);
 		} else {
 			this.canvas.setPenWidth(0);
 		}
 
 		int[] avgValues = this.getAveragedVals(x-(n/2), y, n, height);
+		// this.canvas.setPenColor(0, 0, 0);
 		this.canvas.setPenColor(avgValues[0], avgValues[1], avgValues[2]);
 		// top left vertex
 		this.canvas.setPosition(x, y);
@@ -297,6 +324,7 @@ public class ImageManip {
 		this.canvas.setDirection(180);	
 		this.canvas.drawForward(n);		
 
+		// this.canvas.setPenColor(avgValues[0], avgValues[1], avgValues[2]);
 		this.canvas.fillPoly(xPoints, yPoints, NUM_TRIANGLE_SIDES);
 		if (isRGBTri) {
 			this.createMiniTriangles(xPoints, yPoints, avgValues);
@@ -312,10 +340,10 @@ public class ImageManip {
 			System.exit(1);
 		}
 
-		ImageManip imageManip = new ImageManip(pirateArgs[0]);
-		// imageManip.circles(Integer.parseInt(pirateArgs[1]), true);
+		ImageManip imageManip = new ImageManip("../" + pirateArgs[0]);
+		imageManip.circles(Integer.parseInt(pirateArgs[1]), true);
 		// imageManip.squares(Integer.parseInt(pirateArgs[1]));
-		imageManip.triangles(Integer.parseInt(pirateArgs[1]), true);
+		// imageManip.triangles(Integer.parseInt(pirateArgs[1]), true);
 		imageManip.displayNewImage();
 	}
 }
